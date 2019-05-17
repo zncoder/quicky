@@ -55,3 +55,5 @@ function onKeyUp(ev) {
     break
   }
 }
+
+init()
