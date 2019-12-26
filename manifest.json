@@ -1,6 +1,6 @@
 {
   "name": "Single Key Browsing",
-  "version": "1.0.1",
+  "version": "1.2.0",
   "manifest_version": 2,
   "description": "A few single key shortcuts for common browsing actions",
   "icons": {
@@ -8,6 +8,14 @@
   },
   "background": {
     "scripts": [ "background.js" ]
+  },
+  "permissions": [
+		"storage",
+		"activeTab"
+  ],
+	"browser_action": {
+		"default_icon": "icons/32.png",
+		"default_title": "Enable/disable key shortcuts"
   },
   "content_scripts": [
     {

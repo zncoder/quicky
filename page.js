@@ -1,9 +1,3 @@
-function init() {
-  if (!isBlacklisted()) {
-		document.addEventListener('keyup', onKeyUp)
-	}
-}
-
 // borrowed from https://github.com/jeresig/jquery.hotkeys/blob/master/jquery.hotkeys.js
 
 let textAcceptingInputTypes = ["text", "password", "number", "email", "url", "range", "date", "month", "week", "time", "datetime", "datetime-local", "search", "color", "tel"]
@@ -25,17 +19,10 @@ function inText(el) {
 
 // hotkeys:
 
-// TODO: make this option
-let hotkeyBlacklist = new Set(['mail.google.com', 'www.typingclub.com'])
-
-function isBlacklisted() {
-  return hotkeyBlacklist.has(window.location.hostname)
-}
-
 function onKeyUp(ev) {
-	if (ev.altKey || ev.shiftKey || ev.ctrlKey || ev.metaKey || inText(ev.target)) {
-		return
-	}
+  if (ev.altKey || ev.shiftKey || ev.ctrlKey || ev.metaKey || inText(ev.target)) {
+    return
+  }
 
   switch (ev.keyCode) {
   case 188: // ,
@@ -51,9 +38,43 @@ function onKeyUp(ev) {
     break
 
   case 90: // z
-    chrome.runtime.sendMessage({closeTab: true})
+    chrome.runtime.sendMessage({op: "closeTab"})
     break
   }
+}
+
+async function isEnabled() {
+	let h = window.location.hostname
+	let resp = await new Promise(resolve => {
+		chrome.runtime.sendMessage({op: "enabled", arg: h}, x => resolve(x))
+	})
+	return resp.enabled
+}
+
+function handleMessage(req, sender, sendResponse) {
+	if (req.enabled) {
+		enableKeys()
+	} else {
+		disableKeys()
+	}
+	sendResponse({})
+}
+
+function enableKeys() {
+  document.addEventListener('keyup', onKeyUp)
+}
+
+function disableKeys() {
+  document.removeEventListener('keyup', onKeyUp)
+}
+
+async function init() {
+	let ok = await isEnabled()
+	if (ok) {
+    enableKeys()
+  }
+
+	chrome.runtime.onMessage.addListener(handleMessage)
 }
 
 init()
